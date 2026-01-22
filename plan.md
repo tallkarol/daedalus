@@ -1,0 +1,9 @@
+- [ ] Confirm baseline checks (lint/test/build) and note failures due to missing app
+- [ ] Scaffold Next.js app with Tailwind + TypeScript + App Router
+- [ ] Add shadcn/ui styling primitives, theme provider, dark mode toggle, and app shell
+- [ ] Implement dashboard, docs (MDX from content/docs), tools pages, and Relay toolbox
+- [ ] Add core Relay generators (event links, ICS, WooCommerce, tracking)
+- [ ] Update README and docs per BUILD.md
+- [ ] Run lint/build/tests and fix related issues
+- [ ] Manually verify UI and capture Playwright screenshot
+- [ ] Run code review + CodeQL, address findings
