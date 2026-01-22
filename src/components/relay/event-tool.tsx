@@ -1,11 +1,25 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  Calendar,
+  MapPin,
+  FileText,
+  Clock,
+  Globe,
+  Link as LinkIcon,
+  User,
+  Mail,
+  Sparkles,
+  Download,
+  Copy,
+  CheckCircle2,
+} from "lucide-react";
 
 import { buildCalendarLinks } from "@/core/relay/eventLinks";
 import { buildIcs } from "@/core/relay/ics";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -16,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import { OutputField } from "@/components/relay/output-field";
 import { toast } from "@/components/ui/use-toast";
 import { EndMode, EventHistoryPayload } from "@/components/relay/relay-types";
@@ -179,141 +194,290 @@ export function EventTool({
 
   return (
     <div className="space-y-6">
-      <Card className="space-y-4 p-6">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Title *</label>
-            <Input value={title} onChange={(event) => setTitle(event.target.value)} />
+      {/* Basic Information Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-950/20">
+              <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <CardTitle>Event Details</CardTitle>
+              <CardDescription>Basic information about your event</CardDescription>
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Location</label>
-            <Input
-              value={location}
-              onChange={(event) => setLocation(event.target.value)}
-            />
-          </div>
-          <div className="space-y-2 md:col-span-2">
-            <label className="text-sm font-medium">Description</label>
-            <Textarea
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Start *</label>
-            <Input
-              type={allDay ? "date" : "datetime-local"}
-              value={start}
-              onChange={(event) => setStart(event.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Timezone</label>
-            <Select value={timezone} onValueChange={setTimezone}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select timezone" />
-              </SelectTrigger>
-              <SelectContent>
-                {timezones.map((zone) => (
-                  <SelectItem key={zone} value={zone}>
-                    {zone}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-3">
-            <Switch checked={allDay} onCheckedChange={setAllDay} />
-            <div className="text-sm">All-day event</div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Ends</label>
-            <Select value={endMode} onValueChange={(value) => setEndMode(value as EndMode)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="default">No end (60 min)</SelectItem>
-                <SelectItem value="specific">Specific end</SelectItem>
-                <SelectItem value="duration">Duration</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {endMode === "specific" && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium">End</label>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2 md:col-span-2">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                Event Title <span className="text-destructive">*</span>
+              </label>
               <Input
-                type={allDay ? "date" : "datetime-local"}
-                value={end}
-                onChange={(event) => setEnd(event.target.value)}
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder="e.g., Team Meeting"
+                className="h-10"
               />
             </div>
-          )}
-          {endMode === "duration" && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Duration (minutes)</label>
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                Location
+              </label>
               <Input
-                type="number"
-                min={15}
-                value={durationMinutes}
-                onChange={(event) =>
-                  setDurationMinutes(Number(event.target.value) || 0)
-                }
+                value={location}
+                onChange={(event) => setLocation(event.target.value)}
+                placeholder="e.g., Conference Room A"
+                className="h-10"
               />
             </div>
-          )}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Event URL</label>
-            <Input value={url} onChange={(event) => setUrl(event.target.value)} />
+            <div className="space-y-2 md:col-span-2">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                Description
+              </label>
+              <Textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Add event description..."
+                rows={3}
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Organizer Name</label>
-            <Input
-              value={organizerName}
-              onChange={(event) => setOrganizerName(event.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Organizer Email</label>
-            <Input
-              value={organizerEmail}
-              onChange={(event) => setOrganizerEmail(event.target.value)}
-            />
-          </div>
-        </div>
-        {helperText && (
-          <p className="text-xs text-muted-foreground">{helperText}</p>
-        )}
-        <Button onClick={handleGenerate} disabled={!canGenerate}>
-          Generate
-        </Button>
+        </CardContent>
       </Card>
 
+      {/* Date & Time Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-purple-100 p-2 dark:bg-purple-950/20">
+              <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <CardTitle>Date & Time</CardTitle>
+              <CardDescription>When does your event occur?</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                Start Time <span className="text-destructive">*</span>
+              </label>
+              <Input
+                type={allDay ? "date" : "datetime-local"}
+                value={start}
+                onChange={(event) => setStart(event.target.value)}
+                className="h-10"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <Globe className="h-4 w-4 text-muted-foreground" />
+                Timezone
+              </label>
+              <Select value={timezone} onValueChange={setTimezone}>
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {timezones.map((zone) => (
+                    <SelectItem key={zone} value={zone}>
+                      {zone}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-3 rounded-lg border p-3 md:col-span-2">
+              <Switch checked={allDay} onCheckedChange={setAllDay} />
+              <div>
+                <div className="text-sm font-medium">All-day event</div>
+                <div className="text-xs text-muted-foreground">
+                  Event spans the entire day
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                End Mode
+              </label>
+              <Select
+                value={endMode}
+                onValueChange={(value) => setEndMode(value as EndMode)}
+              >
+                <SelectTrigger className="h-10">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Default (60 min)</SelectItem>
+                  <SelectItem value="specific">Specific end time</SelectItem>
+                  <SelectItem value="duration">Duration</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {endMode === "specific" && (
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  End Time
+                </label>
+                <Input
+                  type={allDay ? "date" : "datetime-local"}
+                  value={end}
+                  onChange={(event) => setEnd(event.target.value)}
+                  className="h-10"
+                />
+              </div>
+            )}
+            {endMode === "duration" && (
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  Duration (minutes)
+                </label>
+                <Input
+                  type="number"
+                  min={15}
+                  value={durationMinutes}
+                  onChange={(event) =>
+                    setDurationMinutes(Number(event.target.value) || 0)
+                  }
+                  className="h-10"
+                />
+              </div>
+            )}
+          </div>
+          {helperText && (
+            <div className="rounded-md bg-muted/50 p-3">
+              <p className="text-xs text-muted-foreground">{helperText}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Additional Information Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-green-100 p-2 dark:bg-green-950/20">
+              <LinkIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <CardTitle>Additional Information</CardTitle>
+              <CardDescription>Links and organizer details</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                Event URL
+              </label>
+              <Input
+                value={url}
+                onChange={(event) => setUrl(event.target.value)}
+                placeholder="https://example.com/event"
+                className="h-10"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <User className="h-4 w-4 text-muted-foreground" />
+                Organizer Name
+              </label>
+              <Input
+                value={organizerName}
+                onChange={(event) => setOrganizerName(event.target.value)}
+                placeholder="John Doe"
+                className="h-10"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                Organizer Email
+              </label>
+              <Input
+                type="email"
+                value={organizerEmail}
+                onChange={(event) => setOrganizerEmail(event.target.value)}
+                placeholder="organizer@example.com"
+                className="h-10"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Generate Button */}
+      <div className="flex items-center justify-end gap-3">
+        <Button
+          onClick={handleGenerate}
+          disabled={!canGenerate}
+          size="lg"
+          className="min-w-[140px]"
+        >
+          <Sparkles className="mr-2 h-4 w-4" />
+          Generate Links
+        </Button>
+      </div>
+
+      {/* Outputs Section */}
       {outputs && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Outputs</h2>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <h2 className="text-2xl font-semibold">Generated Links</h2>
+            </div>
             <Button variant="outline" onClick={handleCopyAll}>
-              Copy all links
+              <Copy className="mr-2 h-4 w-4" />
+              Copy All
             </Button>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <OutputField label="Google Calendar" value={outputs.google} />
             <OutputField label="Outlook Web" value={outputs.outlook} />
           </div>
-          <Card className="space-y-3 p-4">
-            <div className="text-sm font-semibold text-muted-foreground">ICS</div>
-            <pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 text-xs">
-              {outputs.ics}
-            </pre>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" onClick={() => navigator.clipboard.writeText(outputs.ics)}>
-                Copy ICS
-              </Button>
-              <Button variant="outline" onClick={handleDownload}>
-                Download for Apple Calendar (.ics)
-              </Button>
-            </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5" />
+                ICS File
+              </CardTitle>
+              <CardDescription>
+                Download for Apple Calendar, Outlook, or other calendar apps
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-md border bg-muted/30 p-4">
+                <pre className="max-h-64 overflow-auto text-xs leading-relaxed">
+                  {outputs.ics}
+                </pre>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => navigator.clipboard.writeText(outputs.ics)}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy ICS
+                </Button>
+                <Button variant="outline" onClick={handleDownload}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download .ics File
+                </Button>
+              </div>
+            </CardContent>
           </Card>
         </div>
       )}

@@ -1,113 +1,125 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
-import { ToolSubNav } from "@/components/relay/tool-sub-nav";
-import { EventTool } from "@/components/relay/event-tool";
-import { WooTool } from "@/components/relay/woo-tool";
-import { TrackingTool } from "@/components/relay/tracking-tool";
-import { HistoryList, HistoryItem } from "@/components/relay/history-list";
+import Link from "next/link";
+import { Calendar, ShoppingCart, Link as LinkIcon, ArrowRight, Zap } from "lucide-react";
 import {
-  EventHistoryPayload,
-  TrackingHistoryPayload,
-  WooHistoryPayload,
-} from "@/components/relay/relay-types";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
-const STORAGE_KEY = "daedalus-relay-history";
+const tools = [
+  {
+    id: "event",
+    title: "Event Bundle",
+    description: "Generate calendar links for Google Calendar, Outlook, and ICS files.",
+    href: "/tools/relay/event",
+    icon: Calendar,
+    color: "text-blue-600 dark:text-blue-400",
+    bgColor: "bg-blue-50 dark:bg-blue-950/20",
+    borderColor: "border-blue-200 dark:border-blue-900",
+  },
+  {
+    id: "woo",
+    title: "WooCommerce",
+    description: "Create add-to-cart links with products, coupons, and UTM tracking.",
+    href: "/tools/relay/woo",
+    icon: ShoppingCart,
+    color: "text-purple-600 dark:text-purple-400",
+    bgColor: "bg-purple-50 dark:bg-purple-950/20",
+    borderColor: "border-purple-200 dark:border-purple-900",
+  },
+  {
+    id: "tracking",
+    title: "UTM Builder",
+    description: "Build tracked URLs with UTM parameters and custom query strings.",
+    href: "/tools/relay/tracking",
+    icon: LinkIcon,
+    color: "text-green-600 dark:text-green-400",
+    bgColor: "bg-green-50 dark:bg-green-950/20",
+    borderColor: "border-green-200 dark:border-green-900",
+  },
+];
 
-type RelayHistory = {
-  event: HistoryItem[];
-  woo: HistoryItem[];
-  tracking: HistoryItem[];
-};
-
-const defaultHistory: RelayHistory = {
-  event: [],
-  woo: [],
-  tracking: [],
-};
-
-function getHistory(): RelayHistory {
-  if (typeof window === "undefined") return defaultHistory;
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-  if (!raw) return defaultHistory;
-  try {
-    return JSON.parse(raw) as RelayHistory;
-  } catch {
-    return defaultHistory;
-  }
-}
-
-function saveHistory(history: RelayHistory) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-}
-
-export default function RelayPage() {
-  const [activeTool, setActiveTool] = useState("event");
-  const [history, setHistory] = useState<RelayHistory>(() => getHistory());
-  const [selectedPayload, setSelectedPayload] = useState<string | null>(null);
-
-  const selectedData = useMemo(() => {
-    if (!selectedPayload) return null;
-    return JSON.parse(selectedPayload) as
-      | EventHistoryPayload
-      | WooHistoryPayload
-      | TrackingHistoryPayload;
-  }, [selectedPayload]);
-
-  function handleSave<T>(tool: keyof RelayHistory, label: string, payload: T) {
-    const next = { ...history };
-    const items = next[tool] ?? [];
-    const newItem: HistoryItem = {
-      id: `${Date.now()}`,
-      label,
-      timestamp: new Date().toISOString(),
-      payload: JSON.stringify(payload),
-    };
-    next[tool] = [newItem, ...items].slice(0, 10);
-    setHistory(next);
-    saveHistory(next);
-  }
-
-  function handleSelect(item: HistoryItem) {
-    setSelectedPayload(item.payload);
-  }
-
+export default function RelayDashboardPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold">Relay Toolbox</h1>
-        <p className="text-muted-foreground">
-          Generate event bundles, WooCommerce links, and UTM tracking URLs.
-        </p>
-      </div>
-      <ToolSubNav value={activeTool} onValueChange={setActiveTool} />
-      <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-        <div className="space-y-4">
-          {activeTool === "event" && (
-            <EventTool
-              onSave={(label, payload) => handleSave("event", label, payload)}
-              initialData={selectedData as EventHistoryPayload | null}
-            />
-          )}
-          {activeTool === "woo" && (
-            <WooTool
-              onSave={(label, payload) => handleSave("woo", label, payload)}
-              initialData={selectedData as WooHistoryPayload | null}
-            />
-          )}
-          {activeTool === "tracking" && (
-            <TrackingTool
-              onSave={(label, payload) => handleSave("tracking", label, payload)}
-              initialData={selectedData as TrackingHistoryPayload | null}
-            />
-          )}
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-primary/10 p-2">
+            <Zap className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight">Relay Toolbox</h1>
+            <p className="text-lg text-muted-foreground">
+              Generate event bundles, WooCommerce links, and UTM tracking URLs.
+            </p>
+          </div>
         </div>
-        <HistoryList
-          items={history[activeTool as keyof RelayHistory] ?? []}
-          onSelect={handleSelect}
-        />
       </div>
+
+      {/* Tools Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {tools.map((tool) => {
+          const Icon = tool.icon;
+          return (
+            <Card
+              key={tool.id}
+              className="group transition-all hover:shadow-lg hover:border-primary/50"
+            >
+              <CardHeader>
+                <div
+                  className={`mb-4 flex h-12 w-12 items-center justify-center rounded-lg ${tool.bgColor} ${tool.borderColor} border`}
+                >
+                  <Icon className={`h-6 w-6 ${tool.color}`} />
+                </div>
+                <CardTitle className="text-xl">{tool.title}</CardTitle>
+                <CardDescription className="mt-2">
+                  {tool.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground">
+                  <Link href={tool.href} className="flex items-center gap-2">
+                    Open Tool
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Quick Stats */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Start</CardTitle>
+          <CardDescription>
+            Choose a tool above to get started generating links
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-lg border p-4">
+              <div className="text-2xl font-bold text-primary">3</div>
+              <div className="text-sm text-muted-foreground">Available Tools</div>
+            </div>
+            <div className="rounded-lg border p-4">
+              <div className="text-2xl font-bold text-primary">∞</div>
+              <div className="text-sm text-muted-foreground">Links Generated</div>
+            </div>
+            <div className="rounded-lg border p-4">
+              <div className="text-2xl font-bold text-primary">100%</div>
+              <div className="text-sm text-muted-foreground">Free to Use</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
