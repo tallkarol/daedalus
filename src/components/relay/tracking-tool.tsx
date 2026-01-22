@@ -1,23 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { buildTrackingLink } from "@/core/relay/trackingLinks";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { OutputField } from "@/components/relay/output-field";
-
-export type TrackingHistoryPayload = {
-  destination: string;
-  utmSource: string;
-  utmMedium: string;
-  utmCampaign: string;
-  utmContent: string;
-  utmTerm: string;
-  extra: Array<{ key: string; value: string }>;
-  linkText: string;
-};
+import { TrackingHistoryPayload } from "@/components/relay/relay-types";
 
 export function TrackingTool({
   onSave,
@@ -47,6 +37,12 @@ export function TrackingTool({
   );
 
   const canGenerate = destination.trim().length > 0;
+
+  useEffect(() => {
+    if (!initialData || !output) return;
+    handleGenerate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData]);
 
   function handleExtraChange(
     index: number,

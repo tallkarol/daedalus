@@ -18,39 +18,43 @@ export function buildWooLinks({
   destination,
   utm,
 }: WooInput) {
-  const base = new URL(baseUrl);
-  const addParams = new URLSearchParams();
+  const buildParams = (options?: {
+    includeCoupon?: boolean;
+    includeDestination?: boolean;
+  }) => {
+    const addParams = new URLSearchParams();
 
-  products.forEach((product) => {
-    addParams.append("add-to-cart", product.productId);
-    addParams.append("quantity", String(product.quantity));
-  });
-
-  if (coupon) {
-    addParams.append("coupon", coupon);
-  }
-
-  if (destination) {
-    addParams.append("destination", destination);
-  }
-
-  if (utm) {
-    Object.entries(utm).forEach(([key, value]) => {
-      if (value) {
-        addParams.append(key, value);
-      }
+    products.forEach((product) => {
+      addParams.append("add-to-cart", product.productId);
+      addParams.append("quantity", String(product.quantity));
     });
-  }
 
-  const buildLink = () => {
-    const url = new URL(base.toString());
+    if (options?.includeCoupon && coupon) {
+      addParams.append("coupon", coupon);
+    }
+
+    if (options?.includeDestination && destination) {
+      addParams.append("destination", destination);
+    }
+
+    if (utm) {
+      Object.entries(utm).forEach(([key, value]) => {
+        if (value) {
+          addParams.append(key, value);
+        }
+      });
+    }
+
+    const url = new URL(baseUrl);
     url.search = addParams.toString();
     return url.toString();
   };
 
-  const link = buildLink();
-
   return {
-    cartLink: link,
+    cartLink: buildParams(),
+    couponLink: coupon ? buildParams({ includeCoupon: true }) : undefined,
+    destinationLink: destination
+      ? buildParams({ includeDestination: true })
+      : undefined,
   };
 }

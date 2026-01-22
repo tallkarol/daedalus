@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 
 const TOAST_LIMIT = 1;
@@ -8,6 +10,7 @@ type ToasterToast = {
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: React.ReactElement;
+  open?: boolean;
 };
 
 type State = {

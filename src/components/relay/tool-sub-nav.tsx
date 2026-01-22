@@ -17,7 +17,7 @@ export function ToolSubNav({
 }) {
   return (
     <Tabs value={value} onValueChange={onValueChange}>
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-1 gap-1 sm:grid-cols-3 sm:gap-0">
         {tools.map((tool) => (
           <TabsTrigger key={tool.value} value={tool.value}>
             {tool.label}

@@ -9,6 +9,7 @@ function escapeText(value: string) {
 }
 
 function formatUtc(date: Date) {
+  // Use UTC timestamps for a consistent v1 time strategy.
   return date.toISOString().replace(/[-:]/g, "").replace(/\..+/, "Z");
 }
 

@@ -1,17 +1,24 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { buildCalendarLinks } from "@/core/relay/eventLinks";
 import { buildIcs } from "@/core/relay/ics";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { OutputField } from "@/components/relay/output-field";
 import { toast } from "@/components/ui/use-toast";
+import { EndMode, EventHistoryPayload } from "@/components/relay/relay-types";
 
 const timezones = [
   "UTC",
@@ -20,23 +27,6 @@ const timezones = [
   "America/Denver",
   "America/Los_Angeles",
 ];
-
-type EndMode = "default" | "specific" | "duration";
-
-export type EventHistoryPayload = {
-  title: string;
-  description: string;
-  location: string;
-  start: string;
-  timezone: string;
-  allDay: boolean;
-  endMode: EndMode;
-  end: string;
-  durationMinutes: number;
-  url: string;
-  organizerName: string;
-  organizerEmail: string;
-};
 
 export function EventTool({
   onSave,
@@ -180,6 +170,12 @@ export function EventTool({
     link.click();
     URL.revokeObjectURL(url);
   }
+
+  useEffect(() => {
+    if (!initialData) return;
+    handleGenerate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData]);
 
   return (
     <div className="space-y-6">

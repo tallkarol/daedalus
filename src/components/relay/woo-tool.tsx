@@ -2,21 +2,12 @@
 
 import { useState } from "react";
 
-import { buildWooLinks, WooProductRow } from "@/core/relay/wooLinks";
+import { buildWooLinks } from "@/core/relay/wooLinks";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { OutputField } from "@/components/relay/output-field";
-
-export type WooHistoryPayload = {
-  baseUrl: string;
-  products: WooProductRow[];
-  coupon: string;
-  destination: string;
-  utmSource: string;
-  utmMedium: string;
-  utmCampaign: string;
-};
+import { WooHistoryPayload, WooProductRow } from "@/components/relay/relay-types";
 
 export function WooTool({
   onSave,
@@ -38,7 +29,11 @@ export function WooTool({
   const [utmCampaign, setUtmCampaign] = useState(
     initialData?.utmCampaign ?? ""
   );
-  const [output, setOutput] = useState<string | null>(null);
+  const [output, setOutput] = useState<{
+    cartLink: string;
+    couponLink?: string;
+    destinationLink?: string;
+  } | null>(null);
 
   const canGenerate = baseUrl.trim().length > 0 && products[0].productId !== "";
 
@@ -68,7 +63,7 @@ export function WooTool({
         utm_campaign: utmCampaign,
       },
     });
-    setOutput(link.cartLink);
+    setOutput(link);
     onSave(baseUrl, {
       baseUrl,
       products,
@@ -94,18 +89,25 @@ export function WooTool({
         <div className="space-y-3">
           <div className="text-sm font-medium">Products</div>
           {products.map((row, index) => (
-            <div key={`${row.productId}-${index}`} className="grid gap-3 md:grid-cols-2">
+            <div
+              key={`${row.productId}-${index}`}
+              className="grid gap-3 md:grid-cols-2"
+            >
               <Input
                 placeholder="Product ID"
                 value={row.productId}
-                onChange={(event) => handleChange(index, "productId", event.target.value)}
+                onChange={(event) =>
+                  handleChange(index, "productId", event.target.value)
+                }
               />
               <Input
                 type="number"
                 min={1}
                 placeholder="Quantity"
                 value={row.quantity}
-                onChange={(event) => handleChange(index, "quantity", event.target.value)}
+                onChange={(event) =>
+                  handleChange(index, "quantity", event.target.value)
+                }
               />
             </div>
           ))}
@@ -154,7 +156,16 @@ export function WooTool({
       {output && (
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">Outputs</h2>
-          <OutputField label="Add to cart" value={output} />
+          <OutputField label="Add to cart" value={output.cartLink} />
+          {output.couponLink && (
+            <OutputField label="Add to cart + coupon" value={output.couponLink} />
+          )}
+          {output.destinationLink && (
+            <OutputField
+              label="Add to cart + destination"
+              value={output.destinationLink}
+            />
+          )}
         </div>
       )}
     </div>

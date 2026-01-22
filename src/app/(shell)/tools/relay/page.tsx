@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { ToolSubNav } from "@/components/relay/tool-sub-nav";
-import { EventTool, EventHistoryPayload } from "@/components/relay/event-tool";
-import { WooTool, WooHistoryPayload } from "@/components/relay/woo-tool";
-import {
-  TrackingTool,
-  TrackingHistoryPayload,
-} from "@/components/relay/tracking-tool";
+import { EventTool } from "@/components/relay/event-tool";
+import { WooTool } from "@/components/relay/woo-tool";
+import { TrackingTool } from "@/components/relay/tracking-tool";
 import { HistoryList, HistoryItem } from "@/components/relay/history-list";
+import {
+  EventHistoryPayload,
+  TrackingHistoryPayload,
+  WooHistoryPayload,
+} from "@/components/relay/relay-types";
 
 const STORAGE_KEY = "daedalus-relay-history";
 
@@ -42,12 +44,8 @@ function saveHistory(history: RelayHistory) {
 
 export default function RelayPage() {
   const [activeTool, setActiveTool] = useState("event");
-  const [history, setHistory] = useState<RelayHistory>(defaultHistory);
+  const [history, setHistory] = useState<RelayHistory>(() => getHistory());
   const [selectedPayload, setSelectedPayload] = useState<string | null>(null);
-
-  useEffect(() => {
-    setHistory(getHistory());
-  }, []);
 
   const selectedData = useMemo(() => {
     if (!selectedPayload) return null;

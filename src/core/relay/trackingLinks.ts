@@ -12,6 +12,8 @@ export function buildTrackingLink({
   linkText,
 }: TrackingInput) {
   const url = new URL(destination);
+  const fragment = url.hash;
+  url.hash = "";
   const params = url.searchParams;
 
   Object.entries(utm).forEach(([key, value]) => {
@@ -26,10 +28,7 @@ export function buildTrackingLink({
     }
   });
 
-  const fragment = url.hash;
-  url.hash = "";
   url.search = params.toString();
-
   const finalUrl = `${url.toString()}${fragment}`;
   const html = linkText ? `<a href="${finalUrl}">${linkText}</a>` : "";
 
